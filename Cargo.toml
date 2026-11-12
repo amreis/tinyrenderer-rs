@@ -1,0 +1,10 @@
+[package]
+name = "tinyrenderer-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ndarray = "0.17.2"
+rand = "0.10.3"
+zenbitmaps = { version = "0.1.5", features = ["tga"] }
+

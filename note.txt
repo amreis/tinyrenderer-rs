@@ -1,0 +1,2 @@
+needed me to write a ~/.cargo/config.toml asking to use the
+system linker (/usr/bin/cc)

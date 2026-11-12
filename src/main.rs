@@ -113,7 +113,7 @@ fn draw(model: Model, width: u32, height: u32) -> (Array3<u8>, Array2<f32>) {
             .map(perspective)
             .map(|p| project(p, width, height));
 
-        let color = rand::random::<[u8; 3]>();
+        let color: [u8; 3] = rand::random();
 
         triangle(
             f1[0],

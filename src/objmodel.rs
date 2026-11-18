@@ -9,21 +9,15 @@ pub(crate) struct Tup3<T> {
     inner: (T, T, T),
 }
 
-impl<T> Tup3<T> {
-    pub fn tup(&self) -> &(T, T, T) {
-        &self.inner
-    }
-}
-
 impl<T> From<Tup3<T>> for Vec<T> {
     fn from(value: Tup3<T>) -> Self {
-        return vec![value.inner.0, value.inner.1, value.inner.2];
+        vec![value.inner.0, value.inner.1, value.inner.2]
     }
 }
 
 impl<T> From<Tup3<T>> for [T; 3] {
     fn from(value: Tup3<T>) -> Self {
-        return [value.inner.0, value.inner.1, value.inner.2];
+        [value.inner.0, value.inner.1, value.inner.2]
     }
 }
 

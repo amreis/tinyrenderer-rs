@@ -19,6 +19,12 @@ impl From<(u8, u8, u8)> for Color {
     }
 }
 
+impl From<[u8; 3]> for Color {
+    fn from(value: [u8; 3]) -> Self {
+        Self(value[0], value[1], value[2])
+    }
+}
+
 impl From<Color> for Vec<u8> {
     fn from(value: Color) -> Vec<u8> {
         vec![value.0, value.1, value.2]

@@ -12,7 +12,7 @@ use objmodel::Model;
 
 use crate::{
     camera::Camera,
-    shader::{random::RandomShader, shader::Color},
+    shader::{phong::PhongShader, random::RandomShader, shader::Color},
 };
 
 fn usage() -> &'static str {
@@ -41,7 +41,7 @@ fn draw(
         (WIDTH * 7) / 8,
         (HEIGHT * 7) / 8,
     );
-    let mut shader = RandomShader::new(&model, &camera);
+    let mut shader = PhongShader::new(&model, arr1(&[0.0, 0.0, 1.0]), &camera);
 
     for i in 0..model.faces().len() {
         shader.set_color(rand::random());

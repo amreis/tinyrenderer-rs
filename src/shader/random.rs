@@ -1,5 +1,6 @@
 use ndarray::prelude::*;
 
+use crate::linalg::{cross_prod, normalized};
 use crate::shader::shader::Color;
 use crate::{camera::Camera, objmodel::Model, shader::shader::Shader};
 

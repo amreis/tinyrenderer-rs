@@ -3,6 +3,8 @@ use std::{
     path::Path,
 };
 
+use ndarray::Array3;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 
 pub(crate) struct Tup3<T> {
@@ -29,6 +31,8 @@ pub struct Model {
     faces: Vec<Tup3<usize>>,        // indices into `verts`
     face_normals: Vec<Tup3<usize>>, // indices into `normals`
     face_uvs: Vec<Tup3<usize>>,     // indices into uvw
+
+    texture: Option<Array3<u8>>,
 }
 
 #[derive(Debug)]
@@ -139,9 +143,16 @@ impl Model {
         Result::Ok(Self {
             faces,
             verts,
+            uvw: uvs,
             normals,
             face_normals,
+            face_uvs,
+            texture: None,
         })
+    }
+
+    pub fn add_texture(&mut self, tex: Array3<u8>) {
+        self.texture = Some(tex);
     }
 
     pub fn vertices(&self) -> &Vec<Tup3<f32>> {
@@ -152,11 +163,23 @@ impl Model {
         &self.faces
     }
 
+    pub fn uvs(&self) -> &Vec<Tup3<f32>> {
+        &self.uvw
+    }
+
     pub fn normals(&self) -> &Vec<Tup3<f32>> {
         &self.normals
     }
 
     pub fn face_normals(&self) -> &Vec<Tup3<usize>> {
         &self.face_normals
+    }
+
+    pub fn face_uvs(&self) -> &Vec<Tup3<usize>> {
+        &self.face_uvs
+    }
+
+    pub fn texture(&self) -> Option<&Array3<u8>> {
+        self.texture.as_ref()
     }
 }

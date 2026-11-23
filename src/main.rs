@@ -9,11 +9,12 @@ mod objmodel;
 mod shader;
 mod viewport;
 use objmodel::Model;
+use zenbitmaps::DecodeOutput;
 
 use crate::{camera::Camera, shader::phong::PhongShader};
 
 fn usage() -> &'static str {
-    "Usage: ./tinyrenderer-rs <filename.obj>"
+    "Usage: ./tinyrenderer-rs <filename.obj> [normals.tga]"
 }
 
 const WIDTH: u32 = 2048;
@@ -54,21 +55,72 @@ fn draw(
     (framebuffer, depthbuffer)
 }
 
-fn main() -> ExitCode {
-    let args = args();
-    let filename = match args.skip(1).next() {
-        Some(val) => val,
-        None => {
-            println!("{}", usage());
-            return ExitCode::FAILURE;
+fn to_ndarray_format(tga_data: DecodeOutput) -> Array3<u8> {
+    let (height, width, layout) = (tga_data.height, tga_data.width, tga_data.layout);
+    // layout will be Rgb8, Rgba8, or Gray8, by the documentation of decode_tga()
+    let tga_data = tga_data.into_owned();
+    match layout {
+        zenbitmaps::PixelLayout::Rgb8 => {
+            let pixels = tga_data.pixels();
+            let array = Array::from_vec(pixels.into());
+            array
+                .to_shape((height as usize, width as usize, 3usize))
+                .unwrap()
+                .to_owned()
         }
+        zenbitmaps::PixelLayout::Rgba8 => {
+            let pixels = tga_data.pixels();
+            let array = Array::from_vec(
+                pixels
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(ix, &elt)| if ix % 4 == 3 { None } else { Some(elt) })
+                    .collect::<Vec<_>>()
+                    .into(),
+            );
+            array
+                .to_shape((height as usize, width as usize, 3usize))
+                .unwrap()
+                .to_owned()
+        }
+        _ => unreachable!(),
+    }
+}
+
+fn main() -> ExitCode {
+    let mut args = args().skip(1); // skip over program name
+    let Some(model_filename) = args.next() else {
+        println!("{}", usage());
+        return ExitCode::FAILURE;
     };
+
+    let normals = args
+        .next()
+        .map(|normals_filename| {
+            std::fs::read(&normals_filename).expect("failed to open provided normals file")
+        })
+        .map(|data| {
+            zenbitmaps::decode_tga(&data, zenbitmaps::Unstoppable)
+                .expect("failed to decode .tga file")
+                .into_owned()
+        })
+        .inspect(|normal_data| {
+            println!(
+                "Normals file has height {} and width {} pixels and layout {:?}",
+                normal_data.height, normal_data.width, normal_data.layout,
+            )
+        })
+        .map(to_ndarray_format);
 
     let eye: Array1<f32> = array![-1.0, 0.0, 2.0];
     let center: Array1<f32> = array![0.0, 0.0, 0.0];
     let up: Array1<f32> = array![0.0, 1.0, 0.0];
 
-    let model = Model::read(filename).expect("failed to read .obj");
+    let mut model = Model::read(model_filename).expect("failed to read .obj");
+    if let Some(normal_data) = normals {
+        model.add_texture(normal_data)
+    };
+    let model = model;
 
     let (fbuffer, dbuffer) = draw(model, WIDTH, HEIGHT, &eye, &center, &up);
     let pixels = fbuffer.flatten().to_vec();

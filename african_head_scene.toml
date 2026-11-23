@@ -1,0 +1,12 @@
+[[model]]
+obj_file = "./obj/african_head/african_head.obj"
+normal_map_file = "./obj/african_head/african_head_nm.tga"
+diff_texture_file = "./obj/african_head/african_head_diffuse.tga"
+spec_texture_file = "./obj/african_head/african_head_spec.tga"
+
+[[model]]
+obj_file = "./obj/african_head/african_head_eye_inner.obj"
+normal_map_file = "./obj/african_head/african_head_eye_inner_nm.tga"
+diff_texture_file = "./obj/african_head/african_head_eye_inner_diffuse.tga"
+spec_texture_file = "./obj/african_head/african_head_eye_inner_spec.tga"
+

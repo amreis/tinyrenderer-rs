@@ -38,7 +38,7 @@ impl<'a> RandomShader<'a> {
 }
 
 impl<'a> Shader for RandomShader<'a> {
-    fn fragment(&self, v: &Array1<f32>) -> (bool, Color) {
+    fn fragment(&self, _v: &Array1<f32>) -> (bool, Color) {
         (false, self.color)
     }
 }

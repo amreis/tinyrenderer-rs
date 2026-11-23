@@ -4,7 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+clap = { version = "4.6.9", features = ["derive"] }
 ndarray = "0.17.2"
 rand = "0.10.3"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.2.2"
 zenbitmaps = { version = "0.1.5", features = ["tga"] }
 

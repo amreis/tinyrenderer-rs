@@ -1,5 +1,6 @@
 use std::{
     io::{self, BufRead},
+    ops::Index,
     path::Path,
 };
 
@@ -7,19 +8,30 @@ use ndarray::Array3;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
 
-pub(crate) struct Tup3<T> {
-    inner: (T, T, T),
-}
+pub(crate) struct Tup3<T>(T, T, T);
 
 impl<T> From<Tup3<T>> for Vec<T> {
     fn from(value: Tup3<T>) -> Self {
-        vec![value.inner.0, value.inner.1, value.inner.2]
+        vec![value.0, value.1, value.2]
     }
 }
 
 impl<T> From<Tup3<T>> for [T; 3] {
     fn from(value: Tup3<T>) -> Self {
-        [value.inner.0, value.inner.1, value.inner.2]
+        [value.0, value.1, value.2]
+    }
+}
+
+impl<T> Index<usize> for Tup3<T> {
+    type Output = T;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match index {
+            0 => &self.0,
+            1 => &self.1,
+            2 => &self.2,
+            _ => panic!("invalid index {} for Tup3", index),
+        }
     }
 }
 
@@ -33,6 +45,8 @@ pub struct Model {
     face_uvs: Vec<Tup3<usize>>,     // indices into uvw
 
     normals_texture: Option<Array3<u8>>,
+    diffuse_texture: Option<Array3<u8>>,
+    specular_texture: Option<Array3<u8>>,
 }
 
 #[derive(Debug)]
@@ -54,9 +68,7 @@ impl Model {
             .map(Result::unwrap)
             .collect();
 
-        Tup3 {
-            inner: (split[0], split[1], split[2]),
-        }
+        Tup3(split[0], split[1], split[2])
     }
 
     fn parse_v_line(line: &str) -> Tup3<f32> {
@@ -117,15 +129,9 @@ impl Model {
                 uvs.push(Model::parse_vt_line(&line));
             } else if line.starts_with("f ") {
                 let split = Model::parse_f_line(&line);
-                faces.push(Tup3 {
-                    inner: (split[0].vert, split[1].vert, split[2].vert),
-                });
-                face_uvs.push(Tup3 {
-                    inner: (split[0].uv, split[1].uv, split[2].uv),
-                });
-                face_normals.push(Tup3 {
-                    inner: (split[0].norm, split[1].norm, split[2].norm),
-                });
+                faces.push(Tup3(split[0].vert, split[1].vert, split[2].vert));
+                face_uvs.push(Tup3(split[0].uv, split[1].uv, split[2].uv));
+                face_normals.push(Tup3(split[0].norm, split[1].norm, split[2].norm));
             }
         }
 
@@ -138,11 +144,21 @@ impl Model {
             face_normals,
             face_uvs,
             normals_texture: None,
+            diffuse_texture: None,
+            specular_texture: None,
         })
     }
 
-    pub fn add_texture(&mut self, tex: Array3<u8>) {
+    pub fn add_normal_texture(&mut self, tex: Array3<u8>) {
         self.normals_texture = Some(tex);
+    }
+
+    pub fn add_diffuse_texture(&mut self, tex: Array3<u8>) {
+        self.diffuse_texture = Some(tex)
+    }
+
+    pub fn add_specular_texture(&mut self, tex: Array3<u8>) {
+        self.specular_texture = Some(tex)
     }
 
     pub fn vertices(&self) -> &Vec<Tup3<f32>> {
@@ -171,5 +187,13 @@ impl Model {
 
     pub fn normals_texture(&self) -> Option<&Array3<u8>> {
         self.normals_texture.as_ref()
+    }
+
+    pub fn specular_texture(&self) -> Option<&Array3<u8>> {
+        self.specular_texture.as_ref()
+    }
+
+    pub fn diffuse_texture(&self) -> Option<&Array3<u8>> {
+        self.diffuse_texture.as_ref()
     }
 }

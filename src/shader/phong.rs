@@ -44,7 +44,7 @@ impl<'a> PhongShader<'a> {
             .camera
             .modelview_mat()
             .dot(&array![n[0], n[1], n[2], 0.0]).slice_move(s![..3]);
-        self.tri[vert] = gl_position.iter().copied().collect();
+        self.tri[vert] = gl_position.clone();
         self.camera.persp_mat().dot(&gl_position)
     }
     pub fn set_color(&mut self, color: Color) {
@@ -75,7 +75,7 @@ impl<'a> Shader for PhongShader<'a> {
 
         for channel in &mut c {
             *channel =
-                ((*channel as f32) * (ambient + 0.4 * diffuse + 1.0 * specular).min(1.0)) as u8;
+                ((*channel as f32) * (ambient + 0.4 * diffuse + 0.7 * specular).min(1.0)) as u8;
         }
 
         (false, c.into())

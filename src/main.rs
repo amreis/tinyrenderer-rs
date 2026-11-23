@@ -1,6 +1,6 @@
 use std::{env::args, process::ExitCode};
 
-use ndarray::{prelude::*, stack};
+use ndarray::prelude::*;
 
 mod camera;
 mod geom;
@@ -10,10 +10,7 @@ mod shader;
 mod viewport;
 use objmodel::Model;
 
-use crate::{
-    camera::Camera,
-    shader::{phong::PhongShader, random::RandomShader, shader::Color},
-};
+use crate::{camera::Camera, shader::phong::PhongShader};
 
 fn usage() -> &'static str {
     "Usage: ./tinyrenderer-rs <filename.obj>"

@@ -93,6 +93,7 @@ fn main() -> ExitCode {
         println!("{}", usage());
         return ExitCode::FAILURE;
     };
+    let mut model = Model::read(model_filename).expect("failed to read .obj");
 
     let normals = args
         .next()
@@ -108,7 +109,7 @@ fn main() -> ExitCode {
             println!(
                 "Normals file has height {} and width {} pixels and layout {:?}",
                 normal_data.height, normal_data.width, normal_data.layout,
-            )
+            );
         })
         .map(to_ndarray_format);
 
@@ -116,7 +117,6 @@ fn main() -> ExitCode {
     let center: Array1<f32> = array![0.0, 0.0, 0.0];
     let up: Array1<f32> = array![0.0, 1.0, 0.0];
 
-    let mut model = Model::read(model_filename).expect("failed to read .obj");
     if let Some(normal_data) = normals {
         model.add_texture(normal_data)
     };

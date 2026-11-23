@@ -72,11 +72,11 @@ fn remap(coord: Array1<f32>, height: usize, width: usize) -> [usize; 2] {
 impl<'a> Shader for PhongShader<'a> {
     fn fragment(&self, bar: &Array1<f32>) -> (bool, Color) {
         let mut c = [255u8, 255u8, 255u8];
-        let uv = &self.uv[0] * bar[0] + &self.uv[1] * bar[1] + &self.uv[2] * bar[2];
 
-        let n = match self.model.texture() {
+        let n = match self.model.normals_texture() {
             Some(tex) => {
                 // If there's texture-encoded normal data, use it.
+                let uv = &self.uv[0] * bar[0] + &self.uv[1] * bar[1] + &self.uv[2] * bar[2];
                 let (height, width, _channels) = tex.dim();
 
                 let uv_coords = remap(uv, height, width);
@@ -85,7 +85,8 @@ impl<'a> Shader for PhongShader<'a> {
                     .clone();
                 normalized(n_.mapv(|x| (x as f32 * 2.0 / 255.0) - 1.0))
             }
-            None => normalized(  // If absent, interpolate normals from vertices.
+            None => normalized(
+                // If absent, interpolate normals from vertices.
                 bar[0] * &self.varying_nrm[0]
                     + bar[1] * &self.varying_nrm[1]
                     + bar[2] * &self.varying_nrm[2],

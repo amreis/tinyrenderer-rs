@@ -32,7 +32,7 @@ pub struct Model {
     face_normals: Vec<Tup3<usize>>, // indices into `normals`
     face_uvs: Vec<Tup3<usize>>,     // indices into uvw
 
-    texture: Option<Array3<u8>>,
+    normals_texture: Option<Array3<u8>>,
 }
 
 #[derive(Debug)]
@@ -47,9 +47,7 @@ struct FData {
 }
 
 impl Model {
-    fn parse_v_line(line: &str) -> Tup3<f32> {
-        let subslice = &line[2..];
-
+    fn parse_float_triple(subslice: &str) -> Tup3<f32> {
         let split: Vec<_> = subslice
             .split_ascii_whitespace()
             .map(str::parse::<f32>)
@@ -59,32 +57,21 @@ impl Model {
         Tup3 {
             inner: (split[0], split[1], split[2]),
         }
+    }
+
+    fn parse_v_line(line: &str) -> Tup3<f32> {
+        let subslice = &line[2..];
+        Model::parse_float_triple(subslice)
     }
 
     fn parse_vt_line(line: &str) -> Tup3<f32> {
-        let subslice = &line[2..];
-        let split: Vec<_> = subslice
-            .split_ascii_whitespace()
-            .map(str::parse::<f32>)
-            .map(Result::unwrap)
-            .collect();
-
-        Tup3 {
-            inner: (split[0], split[1], split[2]),
-        }
+        let subslice = &line[3..];
+        Model::parse_float_triple(subslice)
     }
 
     fn parse_vn_line(line: &str) -> Tup3<f32> {
-        let subslice = &line[2..];
-        let split: Vec<_> = subslice
-            .split_ascii_whitespace()
-            .map(str::parse::<f32>)
-            .map(Result::unwrap)
-            .collect();
-
-        Tup3 {
-            inner: (split[0], split[1], split[2]),
-        }
+        let subslice = &line[3..];
+        Model::parse_float_triple(subslice)
     }
 
     fn parse_f_line(line: &str) -> Vec<FData> {
@@ -107,7 +94,10 @@ impl Model {
             .collect()
     }
 
-    pub fn read<P: AsRef<Path>>(p: P) -> Result<Self, Error> {
+    pub fn read<P>(p: P) -> Result<Self, Error>
+    where
+        P: AsRef<Path>,
+    {
         let file = std::fs::File::open(p).map_err(|_| Error::FileDoesNotExist)?;
         let reader = io::BufReader::new(file);
 
@@ -140,19 +130,19 @@ impl Model {
         }
 
         println!("Faces: {}, Vertices: {}", faces.len(), verts.len());
-        Result::Ok(Self {
+        Ok(Self {
             faces,
             verts,
             uvw: uvs,
             normals,
             face_normals,
             face_uvs,
-            texture: None,
+            normals_texture: None,
         })
     }
 
     pub fn add_texture(&mut self, tex: Array3<u8>) {
-        self.texture = Some(tex);
+        self.normals_texture = Some(tex);
     }
 
     pub fn vertices(&self) -> &Vec<Tup3<f32>> {
@@ -179,7 +169,7 @@ impl Model {
         &self.face_uvs
     }
 
-    pub fn texture(&self) -> Option<&Array3<u8>> {
-        self.texture.as_ref()
+    pub fn normals_texture(&self) -> Option<&Array3<u8>> {
+        self.normals_texture.as_ref()
     }
 }
